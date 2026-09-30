@@ -1,0 +1,19 @@
+require('dotenv').config();
+const pool = require('./config/db');
+
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/alcancias', require('./routes/alcanciaRoutes'));
+app.use('/api/comunidad', require('./routes/comunidadRoutes'));
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
+});
