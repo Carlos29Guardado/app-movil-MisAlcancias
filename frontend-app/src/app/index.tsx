@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { API_URL } from '../../config/config'
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, Link } from 'expo-router';
 // Configuración global de Google
 GoogleSignin.configure({
-  webClientId: '106176284106-krnssjjd8i427cl9nh3vtitatjtu2u6j.apps.googleusercontent.com',
+  webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID
 });
 
 export default function LoginScreen() {
   const router = useRouter();
+
+  const [mostrarPassword, setMostrarPassword] = useState(false);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,7 +27,7 @@ export default function LoginScreen() {
       // En las versiones más recientes de la librería, el token puede venir anidado en .data
       const idToken = userInfo.data?.idToken;
 
-      const respuesta = await fetch('http://192.168.10.225:3000/api/auth/google', {
+      const respuesta = await fetch(`${API_URL}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken })
@@ -35,7 +38,7 @@ export default function LoginScreen() {
       if (data.token && data.usuario) {
         await AsyncStorage.setItem('userToken', data.token);
         await AsyncStorage.setItem('userData', JSON.stringify(data.usuario));
-        router.replace('/bienvenida'); 
+        router.replace('/bienvenida');
       } else {
         Alert.alert('Error', 'No se pudo verificar el usuario en tu base de datos.');
       }
@@ -52,7 +55,7 @@ export default function LoginScreen() {
 
     try {
       // Nota: Asumo que crearás esta ruta '/login' en tu backend
-      const respuesta = await fetch('http://192.168.10.225:3000/api/auth/login', {
+      const respuesta = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -63,7 +66,7 @@ export default function LoginScreen() {
       if (data.token && data.usuario) {
         await AsyncStorage.setItem('userToken', data.token);
         await AsyncStorage.setItem('userData', JSON.stringify(data.usuario));
-        router.replace('/bienvenida'); 
+        router.replace('/bienvenida');
       } else {
         Alert.alert('Error', data.mensaje || 'Credenciales incorrectas.');
       }
@@ -75,71 +78,92 @@ export default function LoginScreen() {
 
 
   return (
-    <View style={styles.container}>
-      {/* Encabezado */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Ingresar</Text>
-        <Text style={styles.subtitle}>Bienvenido a Mis Alcancías</Text>
-      </View>
-
-      {/* Campos de texto (Para futuro uso) */}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#9DB4C0"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address" 
-
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#9DB4C0"
-        secureTextEntry 
-        value={password}
-        onChangeText={setPassword}
-      />
-
-      {/* Botón Principal (Log In manual) */}
-      <TouchableOpacity style={styles.primaryButton} onPress={iniciarSesionManual}>
-        <Text style={styles.primaryButtonText}>Log In</Text>
-      </TouchableOpacity>
-
-      {/* --- NUEVO: Enlace de Registro --- */}
-      <View style={styles.registerContainer}>
-        <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
-        <Link href="/registro_usuarios" asChild>
-          <TouchableOpacity>
-            <Text style={styles.registerLink}>Regístrate</Text>
-          </TouchableOpacity>
-        </Link>
-      </View>
-
-      {/* Separador "Or" */}
-      <View style={styles.separatorContainer}>
-        <View style={styles.line} />
-        <Text style={styles.orText}>Or</Text>
-        <View style={styles.line} />
-      </View>
-
-      {/* Botón de Google */}
-      <TouchableOpacity
-        style={styles.googleButton}
-        onPress={iniciarSesionNativo}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <AntDesign name="google" size={24} color="#253237" style={styles.googleIcon} />
-        <Text style={styles.googleButtonText}>Iniciar con Google</Text>
-      </TouchableOpacity>
-    </View>
-  );
+        {/* Encabezado */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Inicio de Sesión</Text>
+          <Text style={styles.subtitle}>Bienvenido a Recauda</Text>
+        </View>
+
+        {/* Campos de texto (Para futuro uso) */}
+        <TextInput
+          style={styles.input}
+          placeholder="Correo"
+          placeholderTextColor="#9DB4C0"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Contraseña"
+            placeholderTextColor="#9DB4C0"
+            secureTextEntry={!mostrarPassword}
+            value={password}
+            onChangeText={setPassword}
+          
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setMostrarPassword(!mostrarPassword)}
+          >
+            <Ionicons
+              name={mostrarPassword ? 'eye-off' : 'eye'}
+              size={24}
+              color="#A0A0A0"
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Botón Principal (Log In manual) */}
+        <TouchableOpacity style={styles.primaryButton} onPress={iniciarSesionManual}>
+          <Text style={styles.primaryButtonText}>Ingresar</Text>
+        </TouchableOpacity>
+
+        {/* --- NUEVO: Enlace de Registro --- */}
+        <View style={styles.registerContainer}>
+          <Text style={styles.registerText}>¿No tienes una cuenta? </Text>
+          <Link href="/registro_usuarios" asChild>
+            <TouchableOpacity>
+              <Text style={styles.registerLink}>Regístrate</Text>
+            </TouchableOpacity>
+          </Link>
+        </View>
+
+        {/* Separador "Or" */}
+        <View style={styles.separatorContainer}>
+          <View style={styles.line} />
+          <Text style={styles.orText}>Or</Text>
+          <View style={styles.line} />
+        </View>
+
+        {/* Botón de Google */}
+        <TouchableOpacity
+          style={styles.googleButton}
+          onPress={iniciarSesionNativo}
+        >
+          <AntDesign name="google" size={24} color="#253237" style={styles.googleIcon} />
+          <Text style={styles.googleButtonText}>Iniciar con Google</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#253237', // Fondo oscuro Jet Black
+    backgroundColor: '#253237', 
     paddingHorizontal: 30,
     justifyContent: 'center',
   },
@@ -147,10 +171,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
+  passwordContainer: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#5C6B73', 
+    borderRadius: 12,
+    paddingHorizontal: 16, 
+    height: 55, 
+    marginBottom: 16, 
+  },
+  passwordInput: {
+    flex: 1, 
+    color: '#FFFFFF',
+    fontSize: 16, 
+    height: '100%',
+    padding: 0, 
+  },
+  eyeIcon: {
+    paddingLeft: 10,
+  },
   title: {
     fontSize: 34,
     fontWeight: 'bold',
-    color: '#E0FBFC', // Tono claro para resaltar
+    color: '#E0FBFC', 
   },
   subtitle: {
     fontSize: 14,
@@ -158,7 +201,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   input: {
-    backgroundColor: '#5C6B73', // Fondo gris azulado
+    backgroundColor: '#5C6B73', 
     borderRadius: 12,
     padding: 16,
     color: '#FFFFFF',
@@ -195,7 +238,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   googleButton: {
-    backgroundColor: '#E0FBFC', // Fondo casi blanco
+    backgroundColor: '#E0FBFC', 
     borderRadius: 25,
     padding: 14,
     flexDirection: 'row',
@@ -208,14 +251,14 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   googleButtonText: {
-    color: '#253237', // Letra oscura para buen contraste
+    color: '#253237', 
     fontSize: 16,
     fontWeight: 'bold',
   },
   registerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 20, // Reducido para que quede cerquita del botón de Log In
+    marginTop: 20, 
   },
   registerText: {
     color: '#9DB4C0',
