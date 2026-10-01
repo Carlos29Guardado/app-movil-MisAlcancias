@@ -1,26 +1,31 @@
 import React, { use, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { API_URL } from '../../config/config';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function RegistroScreen() {
-    const router = useRouter();
+  const router = useRouter();
 
-    const [nombre, setNombre] = useState('');
-    const [ email, setEmail ] = useState('');
-    const [ password, setPassword ] = useState('');
-    const [ confirmarPassword, setConfirmarPassword ] = useState('');
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+  const [mostrarConfirmarPassword, setMostrarConfirmarPassword] = useState(false);
 
-    const registrarUsuario = async () => {
-        if(!nombre || !email || !password || !confirmarPassword){
-            Alert.alert('Datos incompletos', 'Por favor, llena todos los campos');
-            return;
-        }
-        if(password !== confirmarPassword){
-            Alert.alert('Error', 'Las contraseñas no coinciden.');
-            return;
-        }
-        try {
-      const respuesta = await fetch('http://192.168.10.225:3000/api/auth/registro', {
+  const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmarPassword, setConfirmarPassword] = useState('');
+
+  const registrarUsuario = async () => {
+    if (!nombre || !email || !password || !confirmarPassword) {
+      Alert.alert('Datos incompletos', 'Por favor, llena todos los campos');
+      return;
+    }
+    if (password !== confirmarPassword) {
+      Alert.alert('Error', 'Las contraseñas no coinciden.');
+      return;
+    }
+    try {
+      const respuesta = await fetch(`${API_URL}/auth/registro`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre, email, password }),
@@ -30,7 +35,7 @@ export default function RegistroScreen() {
 
       if (respuesta.ok) {
         Alert.alert('Éxito', 'Tu cuenta ha sido creada correctamente.');
-        router.back(); 
+        router.back();
       } else {
         Alert.alert('Error', data.mensaje || 'No se pudo crear la cuenta.');
       }
@@ -41,56 +46,90 @@ export default function RegistroScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Crear Cuenta</Text>
-        <Text style={styles.subtitle}>Únete a Mis Alcancías</Text>
-      </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>Crear Cuenta</Text>
+          <Text style={styles.subtitle}>Únete a Recauda</Text>
+        </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre completo"
-        placeholderTextColor="#9DB4C0"
-        value={nombre}
-        onChangeText={setNombre}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#9DB4C0"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#9DB4C0"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirmar Password"
-        placeholderTextColor="#9DB4C0"
-        secureTextEntry
-        value={confirmarPassword}
-        onChangeText={setConfirmarPassword}
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Nombre completo"
+          placeholderTextColor="#9DB4C0"
+          value={nombre}
+          onChangeText={setNombre}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Correo"
+          placeholderTextColor="#9DB4C0"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"/>
+          {/* Campo de Contraseña */}
+<View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Contraseña"
+            placeholderTextColor="#9DB4C0"
+            secureTextEntry={!mostrarPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setMostrarPassword(!mostrarPassword)}
+          >
+            <Ionicons
+              name={mostrarPassword ? 'eye-off' : 'eye'}
+              size={24}
+              color="#9DB4C0"
+            />
+          </TouchableOpacity>
+        </View>
 
-      <TouchableOpacity style={styles.primaryButton} onPress={registrarUsuario}>
-        <Text style={styles.primaryButtonText}>Registrarse</Text>
-      </TouchableOpacity>
-
-      <View style={styles.loginContainer}>
-        <Text style={styles.loginText}>¿Ya tienes una cuenta? </Text>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.loginLink}>Inicia sesión</Text>
+        {/* Campo de Confirmar Contraseña */}
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Confirmar contraseña"
+            placeholderTextColor="#9DB4C0"
+            secureTextEntry={!mostrarConfirmarPassword}
+            value={confirmarPassword}
+            onChangeText={setConfirmarPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setMostrarConfirmarPassword(!mostrarConfirmarPassword)}
+          >
+            <Ionicons
+              name={mostrarConfirmarPassword ? 'eye-off' : 'eye'}
+              size={24}
+              color="#9DB4C0"
+            />
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={styles.primaryButton} onPress={registrarUsuario}>
+          <Text style={styles.primaryButtonText}>Registrarse</Text>
         </TouchableOpacity>
-      </View>
-    </View>
+
+        <View style={styles.loginContainer}>
+          <Text style={styles.loginText}>¿Ya tienes una cuenta? </Text>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Text style={styles.loginLink}>Inicia sesión</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -104,6 +143,25 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 40,
+  },
+  passwordContainer: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#5C6B73', 
+    borderRadius: 12,
+    paddingHorizontal: 16, 
+    height: 55, 
+    marginBottom: 16, 
+  },
+  passwordInput: {
+    flex: 1, 
+    color: '#FFFFFF',
+    fontSize: 16, 
+    height: '100%',
+    padding: 0, 
+  },
+  eyeIcon: {
+    paddingLeft: 10,
   },
   title: {
     fontSize: 34,

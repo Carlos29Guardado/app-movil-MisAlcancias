@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../config/config';
 
 export default function BienvenidaScreen() {
   const router = useRouter();
@@ -62,7 +63,7 @@ export default function BienvenidaScreen() {
         }
 
         const usuario = JSON.parse(usuarioString);
-        const respuesta = await fetch('http://192.168.10.225:3000/api/comunidad/unirse', {
+        const respuesta = await fetch(`${API_URL}/comunidad/unirse`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

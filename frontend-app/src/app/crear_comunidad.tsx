@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../config/config';
 
 export default function CrearComunidadScreen() {
   const router = useRouter();
@@ -50,7 +51,7 @@ export default function CrearComunidadScreen() {
 
       // 3. Hacer la petición al backend para crear el grupo
       // Ojo: mantengo la URL exacta que tú tenías
-      const respuesta = await fetch('http://192.168.10.225:3000/api/comunidad/crear', {
+      const respuesta = await fetch(`${API_URL}/comunidad/crear`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

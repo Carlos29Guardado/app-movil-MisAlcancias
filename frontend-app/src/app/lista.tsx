@@ -3,9 +3,12 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, 
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { API_URL } from '../../config/config';
 
 export default function ListaAlcanciasScreen() {
   const router = useRouter();
+
+  
   const [alcancias, setAlcancias] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
@@ -21,7 +24,8 @@ export default function ListaAlcanciasScreen() {
         return;
       }
       const usuario = JSON.parse(usuarioString);
-      const respuesta = await fetch(`http://192.168.10.225:3000/api/alcancias/comunidad/${usuario.comunidad_id}`); 
+      console.log("INTENTANDO BUSCAR EN:", `${API_URL}/alcancias/comunidad/${usuario.comunidad_id}`);
+      const respuesta = await fetch(`${API_URL}/alcancias/comunidad/${usuario.comunidad_id}`); 
       const datos = await respuesta.json();
 
       if (respuesta.ok) {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { API_URL } from '../../config/config';
 
 export default function EditarAlcanciaScreen() {
     const router = useRouter();
@@ -30,7 +31,7 @@ export default function EditarAlcanciaScreen() {
                 monto_entregado: monto ? parseFloat(monto as string) : null,
             };
 
-            const respuesta = await fetch(`http://192.168.10.225:3000/api/alcancias/${codigo_alcancia}`, {
+            const respuesta = await fetch(`${API_URL}/alcancias/${codigo_alcancia}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

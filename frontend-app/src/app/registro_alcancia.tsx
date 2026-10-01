@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingVi
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../config/config';
 
 export default function RegistrarAlcanciaScreen() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function RegistrarAlcanciaScreen() {
 
         const usuario = JSON.parse(usuarioString);
 
-        const respuesta = await fetch(`http://192.168.10.225:3000/api/alcancias/siguiente/${usuario.comunidad_id}`);
+        const respuesta = await fetch(`${API_URL}/alcancias/siguiente/${usuario.comunidad_id}`);
         const data = await respuesta.json();
 
         if (respuesta.ok) {
@@ -79,7 +80,7 @@ export default function RegistrarAlcanciaScreen() {
         monto_entregado: monto ? parseFloat(monto) : null,
       };
 
-      const respuesta = await fetch('http://192.168.10.225:3000/api/alcancias', {
+      const respuesta = await fetch(`${API_URL}/alcancias`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
