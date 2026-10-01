@@ -4,6 +4,11 @@ Plataforma móvil y backend diseñada para digitalizar el control de donaciones 
 
 **Arquitectura:** Frontend en React Native (Expo) + Backend API REST en Node.js (Express) + Base de datos PostgreSQL alojada en Neon.
 
+<p align="center">
+  <img src="Screenshot_20261001_155535_Recauda.jpg" width="250" alt="Pantalla de Login">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="Screenshot_20261001_155919_Recauda.jpg" width="250" alt="Menú Principal">
+</p>
 
 ---
 
