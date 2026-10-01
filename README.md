@@ -10,6 +10,9 @@ Plataforma móvil y backend diseñada para digitalizar el control de donaciones 
   <img src="frontend-app/assets/menu.jpg" width="250" alt="Menú Principal">
 </p>
 
+### Pruébala en tu dispositivo
+[![Descargar APK](https://img.shields.io/badge/Descargar-APK_Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Carlos29Guardado/recauda-app/releases/latest)
+
 ---
 
 ## Estructura del Proyecto
