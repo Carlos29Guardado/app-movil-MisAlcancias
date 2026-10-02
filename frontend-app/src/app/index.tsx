@@ -47,6 +47,7 @@ export default function LoginScreen() {
       Alert.alert('Cancelado', 'El inicio de sesión fue cancelado o hubo un error.');
     }
   };
+
   const iniciarSesionManual = async () => {
     if (!email || !password) {
       Alert.alert('Datos incompletos', 'Por favor ingresa tu correo y contraseña.');
