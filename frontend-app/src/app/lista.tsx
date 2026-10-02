@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, RefreshControl, TextInput } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,7 +8,13 @@ import { API_URL } from '../../config/config';
 export default function ListaAlcanciasScreen() {
   const router = useRouter();
 
-  
+  //Para Buscador
+  //Estado original: guardad la lista completa e intacta de la base de datos.
+  const [alcanciasOriginales, setAlcanciasOriginales] = useState([]);
+  //Estado filtrado: es el que conectamos a la interfaz visual.
+  const [alcanciasFiltrado, setAlcanciasFiltrado] = useState([]);
+
+  const [busqueda, setBusqueda] = useState('');
   const [alcancias, setAlcancias] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
@@ -29,7 +35,8 @@ export default function ListaAlcanciasScreen() {
       const datos = await respuesta.json();
 
       if (respuesta.ok) {
-        setAlcancias(datos);
+        setAlcanciasOriginales(datos);
+        setAlcanciasFiltrado(datos)
       } else {
         Alert.alert('Error', datos.error || 'No se pudieron cargar las alcancías.');
       }
@@ -53,6 +60,7 @@ export default function ListaAlcanciasScreen() {
   const onRefresh = () => {
     setRefrescando(true);
     cargarAlcancias();
+    setBusqueda('');
   };
 
   // Función para determinar qué estado mostrar basado en los booleanos de tu BD
@@ -60,6 +68,21 @@ export default function ListaAlcanciasScreen() {
     if (item.faltante) return { texto: 'Faltante', color: '#C06C6C', fondo: 'rgba(192, 108, 108, 0.2)' }; // Rojo oscuro
     if (item.devuelta) return { texto: 'Devuelta', color: '#8FBC8F', fondo: 'rgba(143, 188, 143, 0.2)' }; // Verde sutil
     return { texto: 'Colocada', color: '#C2DFE3', fondo: 'rgba(194, 223, 227, 0.2)' }; // Celeste por defecto
+  };
+
+  //Función para la caja de busqueda
+  const ejecutarBusqueda = (texto: any) => {
+    setBusqueda(texto);
+
+    if(texto){
+      const nuevosDatos = alcanciasOriginales.filter((item: any) =>{
+        const nombre = item.nombre_persona ? item.nombre_persona.toUpperCase() : '';
+        return nombre.includes(texto.toUpperCase());
+      });
+      setAlcanciasFiltrado(nuevosDatos);
+    } else {
+      setAlcanciasFiltrado(alcanciasOriginales)
+    }
   };
 
   // El diseño de cada tarjeta individual de la lista
@@ -120,7 +143,14 @@ export default function ListaAlcanciasScreen() {
         <Text style={styles.tituloHeader}>Lista de Alcancías</Text>
         <View style={{ width: 28 }} />
       </View>
-
+      {/* Barra de Búsqueda */}
+    <TextInput
+      style={styles.buscador}
+      placeholder="Buscar por nombre..."
+      value={busqueda}
+      placeholderTextColor="#9ca3af"
+      onChangeText={(texto) => ejecutarBusqueda(texto)} 
+    />
       {/* Cuerpo principal */}
       {cargando ? (
         <View style={styles.cargandoContainer}>
@@ -129,7 +159,7 @@ export default function ListaAlcanciasScreen() {
         </View>
       ) : (
         <FlatList
-          data={alcancias}
+          data={alcanciasFiltrado}
           keyExtractor={(item, index) => index.toString()} 
           renderItem={renderItem}
           contentContainerStyle={styles.listaPadding}
@@ -158,6 +188,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#253237',
+  },
+  buscador: {
+    height: 50,                 
+    backgroundColor: '#1E292D', 
+    color: '#FFFFFF',           
+    borderWidth: 1,            
+    borderColor: '#3A4A50',     
+    borderRadius: 16,           
+    paddingHorizontal: 16,      
+    marginHorizontal: 20,       
+    marginTop: 10,
+    marginBottom: 15,           
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   header: {
     flexDirection: 'row',
@@ -260,4 +307,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 15,
   },
+  item: { padding: 15, borderBottomWidth: 1, borderBottomColor: '#eee' }
 });
